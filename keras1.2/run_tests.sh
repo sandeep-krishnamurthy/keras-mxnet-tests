@@ -22,7 +22,7 @@ cd ../../keras/
 python setup.py install --user
 
 ########## Set Environment Variables ########
-cd ../keras-integration/keras1.2/
+cd ../keras-mxnet-tests/keras1.2/
 echo "Setting Environment Variables for MXNet Keras Integration Tests on CPU machine"
 
 export KERAS_BACKEND="mxnet"

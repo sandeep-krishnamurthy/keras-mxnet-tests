@@ -9,7 +9,7 @@ IS_GPU = (os.environ['MXNET_KERAS_TEST_MACHINE'] == 'GPU')
 GPU_NUM = int(os.environ['GPU_NUM']) if IS_GPU else 0
 
 # This command is useful to fetch GPU memory consumption.
-GPU_MONITOR_CMD = "nvidia-smi --query-gpu=index,memory.used --format=csv -lms 500 -f nvidia-smi-output.csv"
+GPU_MONITOR_CMD = "/usr/local/nvidia/bin/nvidia-smi --query-gpu=index,memory.used --format=csv -lms 500 -f nvidia-smi-output.csv"
 
 def cpu_memory_profile(func_to_profile):
     max_mem_usage = memory_usage(proc=(func_to_profile, ()), max_usage=True)

@@ -209,7 +209,6 @@ for iteration in range(1, 25):
         print('---')
 
 def test_save_load():
-    return true
     # Jenkins has issue with hdf5 installation. Uncomment below when fixed.
     # TODO: @sandeep-krishnamurthy
     #Save and load trained model.

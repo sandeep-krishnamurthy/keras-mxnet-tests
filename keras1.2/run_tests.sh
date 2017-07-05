@@ -11,7 +11,7 @@ pip install --upgrade pip --user
 pip install --upgrade six --user
 
 # For model load and save functionality
-sudo apt-get install python-h5py
+sudo apt-get install -y python-h5py
 
 # Install MXNet
 cd mxnet

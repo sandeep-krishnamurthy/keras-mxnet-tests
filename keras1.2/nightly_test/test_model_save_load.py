@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
-This code is forked from https://github.com/fchollet/keras/blob/master/examples/
-and modified to use as MXNet-Keras integration testing for functionality and sanity performance
-benchmarking.
-
-An implementation of sequence to sequence learning for performing addition
+'''An implementation of sequence to sequence learning for performing addition
 Input: "535+61"
 Output: "596"
 Padding is handled by using a repeated sentinel character (space)
@@ -29,32 +24,19 @@ Four digits inverted:
 Five digits inverted:
 + One layer LSTM (128 HN), 550k training examples = 99% train/test accuracy in 30 epochs
 
+
+This script tests training, saving, loading and predicting addition_rnn model.
+Use 1 gpu for training.
 '''
 
 from __future__ import print_function
-from keras.models import Sequential
+import tempfile
+from keras.models import Sequential, save_model, load_model
 from keras.engine.training import slice_X
 from keras.layers import Activation, TimeDistributed, Dense, RepeatVector, recurrent
 import numpy as np
 from six.moves import range
 
-# Imports for benchmarking
-from utils.profiler import profile
-from utils.model_util import make_model
-
-# Imports for assertions
-from utils.assertion_util import assert_results
-
-from os import environ
-
-# Other environment variables
-MACHINE_TYPE = environ['MXNET_KERAS_TEST_MACHINE']
-IS_GPU = (environ['MXNET_KERAS_TEST_MACHINE'] == 'GPU')
-MACHINE_TYPE = 'GPU' if IS_GPU else 'CPU'
-GPU_NUM = int(environ['GPU_NUM']) if IS_GPU else 0
-
-# Dictionary to store profiling output
-profile_output = {}
 
 class CharacterTable(object):
     """Given a set of characters:
@@ -169,6 +151,7 @@ RNN = recurrent.LSTM
 HIDDEN_SIZE = 128
 BATCH_SIZE = 128
 LAYERS = 1
+context = ['gpu(0)']
 
 print('Build model...')
 model = Sequential()
@@ -192,28 +175,45 @@ for _ in range(LAYERS):
 # of the output sequence, decide which character should be chosen.
 model.add(TimeDistributed(Dense(len(chars))))
 model.add(Activation('softmax'))
-model = make_model(model, optimizer='adam', loss='categorical_crossentropy',
-                     metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy',
+              optimizer='adam',
+              metrics=['accuracy'],
+              context=context)
 model.summary()
-
 
 # Train the model each generation and show predictions against the validation
 # dataset.
-def train_func():
-    # Ideally should be 200.
-    for iteration in range(1, 10):
-        print()
-        print('-' * 50)
-        print('Iteration', iteration)
-        model.fit(X_train, y_train, batch_size=BATCH_SIZE, nb_epoch=1,
-                  validation_data=(X_val, y_val))
+print("Training Model...")
+for iteration in range(1, 25):
+    print()
+    print('-' * 50)
+    print('Iteration', iteration)
+    model.fit(X_train, y_train, batch_size=BATCH_SIZE, nb_epoch=1,
+              validation_data=(X_val, y_val))
+    # Select 10 samples from the validation set at random so we can visualize
+    # errors.
+    for i in range(10):
+        ind = np.random.randint(0, len(X_val))
+        rowX, rowy = X_val[np.array([ind])], y_val[np.array([ind])]
+        preds = model.predict_classes(rowX, verbose=0)
+        q = ctable.decode(rowX[0])
+        correct = ctable.decode(rowy[0])
+        guess = ctable.decode(preds[0], calc_argmax=False)
+        print('Q', q[::-1] if INVERT else q)
+        print('T', correct)
+        if correct == guess:
+            print(colors.ok + '☑' + colors.close, end=" ")
+        else:
+            print(colors.fail + '☒' + colors.close, end=" ")
+        print(guess)
+        print('---')
 
-def test_addition_rnn():
-    ret = profile(train_func)
-    profile_output["TRAINING_TIME"] = str(ret[0]) + ' sec'
-    profile_output["MEM_CONSUMPTION"] = str(ret[1]) + ' MB'
-    profile_output["TRAIN_ACCURACY"] = model.evaluate(X_train, y_train, verbose=0)[1]
-    profile_output["TEST_ACCURACY"] = model.evaluate(X_val, y_val, verbose=0)[1]
-    print("Test Addition RNN")
-    print(profile_output)
-    # TODO: ASSERT results. Above tests whether it is functional. Assert statements will confirm accuracy/memory/speed.
+def test_save_load():
+    #Save and load trained model.
+    #then run prediction on it.
+    print("Predicting with pretrained model...")
+    fname = 'add_rnn.hdf5'
+    save_model(model, fname)
+    new_model = load_model(fname)
+    loss, acc = model.evaluate(X_val, y_val)
+    assert acc >= 0.98, "Low validation accuracy."

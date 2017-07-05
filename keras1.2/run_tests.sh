@@ -10,6 +10,9 @@ pip install pyyaml --user
 pip install --upgrade pip --user
 pip install --upgrade six --user
 
+# For model load and save functionality
+apt-get install python-h5py
+
 # Install MXNet
 cd mxnet
 make clean
@@ -32,3 +35,16 @@ export MXNET_KERAS_TEST_MACHINE="GPU"
 export GPU_NUM="1"
 echo "Running MXNet Keras Integration Test on GPU machine with 1 GPUs"
 nosetests --with-xunit --quiet --nologcapture nightly_test/
+
+########## Run Keras unit tests ########################
+
+cd ../../keras/
+# Prerequisites For running unit tests
+pip install pytest --user
+pip install -e .[tests] --user
+pip install image --user
+pip install --upgrade https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.2.1-cp27-none-linux_x86_64.whl --user
+
+echo "Running Keras unit tests"
+python -m py.test tests/integration_tests/
+python -m py.test tests/keras/

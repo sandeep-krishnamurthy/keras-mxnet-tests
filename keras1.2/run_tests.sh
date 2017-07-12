@@ -36,6 +36,16 @@ export GPU_NUM="1"
 echo "Running MXNet Keras Integration Test on GPU machine with 1 GPUs"
 nosetests --with-xunit --quiet --nologcapture nightly_test/
 
+########## Call the test script with 2 GPUS ############
+export GPU_NUM="2"
+echo "Running MXNet Keras Integration Test on GPU machine with 2 GPUs"
+nosetests --with-xunit --quiet --nologcapture nightly_test/
+
+########## Call the test script with 4 GPUS ############
+export GPU_NUM="4"
+echo "Running MXNet Keras Integration Test on GPU machine with 4 GPUs"
+nosetests --with-xunit --quiet --nologcapture nightly_test/
+
 ########## Run Keras unit tests ########################
 
 cd ../../keras/

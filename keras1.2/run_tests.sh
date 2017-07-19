@@ -18,7 +18,7 @@ cd mxnet
 make clean
 make -j $(nproc) USE_OPENCV=1 USE_BLAS=atlas USE_CUDA=1 USE_CUDA_PATH=/usr/local/cuda USE_CUDNN=1
 cd python
-python setup.py install --user
+pip install -e . --user
 
 # Install Keras with MXNet backend
 cd ../../keras/

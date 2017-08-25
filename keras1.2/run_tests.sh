@@ -14,7 +14,7 @@ pip install --upgrade six --user
 sudo apt-get install -y python-h5py
 
 # Install MXNet
-cd mxnet
+cd incubator-mxnet
 make clean
 make -j $(nproc) USE_OPENCV=1 USE_BLAS=atlas USE_CUDA=1 USE_CUDA_PATH=/usr/local/cuda USE_CUDNN=1
 cd python
